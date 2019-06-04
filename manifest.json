@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+  "name": "gpg-webextension",
+  "version": "0.0.1",
+  "author": "chuck-",
+  "homepage_url": "https://github.com/chuck-/gpg-webextension",
+  "description": "A webextension which adds GnuPG (native) capabilities to browsers",
+  "icons": {
+    "48": "icons/icon.png"
+  },
+
+  "permissions": [
+    "nativeMessaging"
+  ],
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["api.js"]
+    }
+  ],
+
+  "applications": {
+    "gecko": {
+      "id": "gpg@example.com",
+      "strict_min_version": "50.0"
+    }
+  }
+}
