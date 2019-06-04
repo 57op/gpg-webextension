@@ -1,3 +1,33 @@
+const REGISTERED_CONTENT_SCRIPTS = []
+
+async function registerContentscripts(result/*, areaName = "local"*/) {
+  console.log(result)
+
+  if (!result.urls) {
+    return
+  }
+
+  while (REGISTERED_CONTENT_SCRIPTS.length > 0) {
+    REGISTERED_CONTENT_SCRIPTS.pop().unregister()
+  }
+
+  const matches = result.urls.newValue || result.urls
+
+  if (matches.length > 0) {
+    const cs = await browser.contentScripts.register({
+      'js': [
+        {
+          'file': 'api.js'
+        }
+      ],
+      'matches': matches,
+      'runAt': 'document_start'
+    })
+
+    REGISTERED_CONTENT_SCRIPTS.push(cs)
+  }
+}
+
 async function nativeWrap(request) {
   // console.log(`background received from content-script: ${request}`)
   const result = {}
@@ -22,3 +52,7 @@ browser.runtime.onMessage.addListener(async request => {
   const activeTab = await browser.tabs.query({ 'active': true })
   browser.tabs.sendMessage(activeTab[0].id, result)
 })
+
+
+browser.storage.local.get('urls').then(registerContentscripts)
+browser.storage.onChanged.addListener(registerContentscripts)
