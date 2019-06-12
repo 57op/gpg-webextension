@@ -4,6 +4,7 @@ window.addEventListener('message', e => {
       e.data &&
       e.data.direction === 'from-page-script') {
     // send message to background script
+    delete e.data.direction // don't like this, maybe wrap the request in e.data.request and e.data.direction?
     browser.runtime.sendMessage(e.data)
   }
 })
