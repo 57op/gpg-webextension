@@ -17,7 +17,7 @@ async function registerContentscripts(result/*, areaName = "local"*/) {
     const cs = await browser.contentScripts.register({
       'js': [
         {
-          'file': 'api.js'
+          'file': 'proxy.js'
         }
       ],
       'matches': matches,
@@ -36,6 +36,7 @@ async function nativeWrap(request) {
     const response = await browser.runtime
       .sendNativeMessage('gpg', request)
 
+    result.action = request.action
     result.type = response.type
     result.data = response.data
   } catch (e) {
