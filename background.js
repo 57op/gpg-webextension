@@ -48,10 +48,13 @@ async function nativeWrap(request) {
 }
 
 // receive message from content-script
-browser.runtime.onMessage.addListener(async request => {
+browser.runtime.onMessage.addListener(async (request, sender) => {
   const result = await nativeWrap(request)
-  const activeTab = await browser.tabs.query({ 'active': true })
-  browser.tabs.sendMessage(activeTab[0].id, result)
+
+  // TODO: how can we use this?
+  console.log('sender', sender)
+
+  return result
 })
 
 
