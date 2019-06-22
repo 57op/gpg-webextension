@@ -4,7 +4,7 @@ async function onUpdateTab (tabId, changeInfo, tab) {
       tabId,
       {
         'file': 'proxy.js',
-        'runAt': 'document_start'
+        'runAt': 'document_end'
       })
   }
 }
