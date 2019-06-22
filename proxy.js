@@ -1,6 +1,7 @@
 // inject the api script in the page
 const script = document.createElement('script')
 script.src = browser.runtime.getURL('resources/api.js')
+script.onload = e => dispatchEvent(new Event('GPGLoaded'))
 document.head.appendChild(script)
 
 // receive message from page script
