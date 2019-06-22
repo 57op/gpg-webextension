@@ -1,31 +1,38 @@
-const REGISTERED_CONTENT_SCRIPTS = []
+async function onUpdateTab (tabId, changeInfo, tab) {
+  if (changeInfo.status === 'loading' && changeInfo.url) {
+    // inject proxy and script
+    browser.tabs.executeScript(
+      tabId,
+      {
+        'file': 'proxy.js',
+        'runAt': 'document_start'
+      })
+    browser.tabs.executeScript(
+      tabId,
+      {
+        'code': `
+          const script = document.createElement('script')
+          script.src = '${browser.runtime.getURL('resources/api.js')}'
+          document.head.appendChild(script)
+          0`,
+        'runAt': 'document_start'
+      })
+  }
+}
 
 async function registerContentscripts(result/*, areaName = "local"*/) {
-  console.log(result)
-
   if (!result.urls) {
     return
   }
 
-  while (REGISTERED_CONTENT_SCRIPTS.length > 0) {
-    REGISTERED_CONTENT_SCRIPTS.pop().unregister()
-  }
-
   const matches = result.urls.newValue || result.urls
 
-  if (matches.length > 0) {
-    const cs = await browser.contentScripts.register({
-      'js': [
-        {
-          'file': 'proxy.js'
-        }
-      ],
-      'matches': matches,
-      'runAt': 'document_start'
-    })
-
-    REGISTERED_CONTENT_SCRIPTS.push(cs)
+  if (browser.tabs.onUpdated.hasListener(onUpdateTab)) {
+    browser.tabs.onUpdated.removeListener(onUpdateTab)
   }
+
+  // only watch whitelisted urls
+  browser.tabs.onUpdated.addListener(onUpdateTab, { 'urls': matches, 'properties': ['status'] })
 }
 
 async function nativeWrap(request) {
@@ -49,14 +56,8 @@ async function nativeWrap(request) {
 
 // receive message from content-script
 browser.runtime.onMessage.addListener(async (request, sender) => {
-  const result = await nativeWrap(request)
-
-  // TODO: how can we use this?
-  console.log('sender', sender)
-
-  return result
+  return await nativeWrap(request)
 })
-
 
 browser.storage.local.get('urls').then(registerContentscripts)
 browser.storage.onChanged.addListener(registerContentscripts)
