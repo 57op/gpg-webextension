@@ -1,20 +1,9 @@
 async function onUpdateTab (tabId, changeInfo, tab) {
   if (changeInfo.status === 'loading' && changeInfo.url) {
-    // inject proxy and script
     browser.tabs.executeScript(
       tabId,
       {
         'file': 'proxy.js',
-        'runAt': 'document_start'
-      })
-    browser.tabs.executeScript(
-      tabId,
-      {
-        'code': `
-          const script = document.createElement('script')
-          script.src = '${browser.runtime.getURL('resources/api.js')}'
-          document.head.appendChild(script)
-          0`,
         'runAt': 'document_start'
       })
   }
