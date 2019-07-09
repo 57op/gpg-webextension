@@ -12,7 +12,8 @@
   "permissions": [
     "nativeMessaging",
     "storage",
-    "tabs",
+    "activeTab",
+    "webNavigation",
     "<all_urls>"
   ],
 
