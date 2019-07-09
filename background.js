@@ -1,10 +1,20 @@
+async function onCanInject (details) {
+  console.log(details)
+  await browser.tabs.executeScript(
+    details.tabId,
+    {
+      'file': 'proxy.js',
+      'runAt': 'document_start'
+    })
+}
+
 async function onUpdateTab (tabId, changeInfo, tab) {
   if (changeInfo.status === 'loading' && changeInfo.url) {
     browser.tabs.executeScript(
       tabId,
       {
         'file': 'proxy.js',
-        'runAt': 'document_end'
+        'runAt': 'document_start'
       })
   }
 }
@@ -16,12 +26,17 @@ async function registerContentscripts(result/*, areaName = "local"*/) {
 
   const matches = result.urls.newValue || result.urls
 
-  if (browser.tabs.onUpdated.hasListener(onUpdateTab)) {
+  /*if (browser.tabs.onUpdated.hasListener(onUpdateTab)) {
     browser.tabs.onUpdated.removeListener(onUpdateTab)
+  }*/
+
+  if (browser.webNavigation.onCommitted.hasListener(onCanInject)) {
+    browser.webNavigation.onCommitted.removeListener(onCanInject)
   }
 
   // only watch whitelisted urls
-  browser.tabs.onUpdated.addListener(onUpdateTab, { 'urls': matches, 'properties': ['status'] })
+  //browser.tabs.onUpdated.addListener(onUpdateTab, { 'urls': matches, 'properties': ['status'] })
+  browser.webNavigation.onCommitted.addListener(onCanInject, { 'url': [{ 'urlMatches': '.*' }] })
 }
 
 async function nativeWrap(request) {
